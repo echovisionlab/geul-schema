@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  fresh-schema:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Pull pinned PostgreSQL image
+        run: docker pull registry.dsub.io/echovisionlab/geul-postgres@sha256:41a2c6fb9e026ed327463e7662c92c5cc27e918bdaae6fa3447f45335d74494a
+
+      - name: Apply and inspect fresh schema
+        run: |
+          container_name=geul-schema-postgres
+          postgres_image=registry.dsub.io/echovisionlab/geul-postgres@sha256:41a2c6fb9e026ed327463e7662c92c5cc27e918bdaae6fa3447f45335d74494a
+          docker run --detach --name "${container_name}" \
+            --env POSTGRES_USER=postgres \
+            --env POSTGRES_PASSWORD=postgres \
+            --env POSTGRES_DB=postgres \
+            --env POSTGRES_APP_DB=geul \
+            "${postgres_image}" >/dev/null
+          ready=0
+          for _ in $(seq 1 180); do
+            if docker logs "${container_name}" 2>&1 | grep --fixed-strings --quiet 'PostgreSQL init process complete; ready for start up.'; then
+              if docker exec "${container_name}" pg_isready -U postgres -d geul >/dev/null 2>&1; then
+                ready=1
+                break
+              fi
+            fi
+            sleep 1
+          done
+          if [ "${ready}" -ne 1 ]; then
+            docker logs "${container_name}"
+            exit 1
+          fi
+          docker exec --env PGPASSWORD=postgres -i "${container_name}" \
+            psql --no-psqlrc --set ON_ERROR_STOP=1 --username=postgres --dbname=geul < schema.sql
+          docker exec --env PGPASSWORD=postgres -i "${container_name}" \
+            psql --no-psqlrc --set ON_ERROR_STOP=1 --username=postgres --dbname=geul <<'SQL'
+          DO $$
+          DECLARE
+              expected text[] := ARRAY[
+                  'og.generate',
+                  'transcoder.audio',
+                  'transcoder.video',
+                  'waveform.generate',
+                  'asset_optimizer.mesh',
+                  'file.delete',
+                  'email.send',
+                  'email.auth',
+                  'email.campaign',
+                  'user.delete.identity',
+                  'user.delete.avatar',
+                  'ai.metadata.generate',
+                  'translation.generate',
+                  'transcode.result',
+                  'waveform.result',
+                  'mesh.optimization.result',
+                  'release.track_original_audio.projection'
+              ];
+              actual text[];
+          BEGIN
+              SELECT array_agg(queue_name ORDER BY queue_name)
+              INTO actual
+              FROM pgmq.list_queues();
+              IF actual IS DISTINCT FROM (SELECT array_agg(item.value ORDER BY item.value) FROM unnest(expected) AS item(value)) THEN
+                  RAISE EXCEPTION 'queue contract changed: %', actual;
+              END IF;
+          END $$;
+          SELECT extname, extversion
+          FROM pg_extension
+          WHERE extname IN ('ip4r', 'pgcrypto', 'pgmq', 'pgroonga', 'postgis')
+          ORDER BY extname;
+          SQL
+
+      - name: Remove ephemeral PostgreSQL
+        if: always()
+        run: docker rm --force geul-schema-postgres >/dev/null 2>&1 || true
