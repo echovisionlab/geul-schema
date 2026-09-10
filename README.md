@@ -2,15 +2,14 @@
 
 Canonical PostgreSQL schema for a fresh Geul installation.
 
-This repository contains one installable snapshot, not the source project's
-migration history or a schema-version table. Apply `schema.sql` only to a new
-database; `geul` is the recommended database name.
+Apply the installable snapshot in `schema.sql` to a new database; `geul` is the
+recommended database name.
 
 The snapshot requires PostgreSQL 17+ with `pgroonga`, `ip4r`, `postgis`,
 `pgcrypto`, and `pgmq`. It creates non-login `geul_*` service roles and
 validation/replay functions. Queue names and public table, column, and enum
-identifiers remain compatibility contracts. Database owner/login transitions
-are deployment decisions and are intentionally not encoded here.
+identifiers are public contracts. Deployment configures database owners and
+login roles.
 
 Current snapshot: `0.1.0`
 
