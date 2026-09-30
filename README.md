@@ -13,6 +13,26 @@ login roles.
 
 Current snapshot: `0.1.0`
 
+## Page locale write authority
+
+`page_translation.incarnation_id` identifies one locale row's lifetime. It is
+assigned by PostgreSQL on creation and remains stable during updates. Deleting
+and recreating a locale creates a new identity, even when timestamps match.
+Page target write revisions bind this identity, the locale's `updated_at`, and
+the shared Content Document revision, so an old editor cannot write into a
+replacement locale.
+
+Existing installations must apply the following schema change before deploying
+an API that reads Page locale incarnations:
+
+```sql
+ALTER TABLE public.page_translation
+    ADD COLUMN incarnation_id uuid DEFAULT gen_random_uuid() NOT NULL;
+```
+
+This repository supplies a fresh-install snapshot. Applying it or this upgrade
+to a running installation is a separate deployment operation.
+
 ## CI performance
 
 On the same local `linux/amd64` host, a cold-ish fresh-schema run fell from
