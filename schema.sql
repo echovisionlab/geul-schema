@@ -3448,6 +3448,7 @@ END),
 CREATE TABLE public.page_translation (
     entity_id uuid NOT NULL,
     locale text NOT NULL,
+    incarnation_id uuid DEFAULT gen_random_uuid() NOT NULL,
     title text,
     summary text,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
