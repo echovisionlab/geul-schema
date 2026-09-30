@@ -2614,6 +2614,8 @@ CREATE TABLE public.email_delivery_recipient (
     status character varying(50) DEFAULT 'pending'::character varying NOT NULL,
     error_type character varying(100),
     terminal_at timestamp with time zone,
+    delivery_claim_id uuid,
+    delivery_claim_expires_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
     provider_message_id text,
@@ -2622,7 +2624,8 @@ CREATE TABLE public.email_delivery_recipient (
     CONSTRAINT chk_email_delivery_recipient_distinct_ids CHECK ((member_id <> identity_id)),
     CONSTRAINT chk_email_delivery_recipient_result_values CHECK ((((provider_message_id IS NULL) OR (NULLIF(btrim(provider_message_id), ''::text) IS NOT NULL)) AND ((error_type IS NULL) OR (NULLIF(btrim((error_type)::text), ''::text) IS NOT NULL)))),
     CONSTRAINT chk_email_delivery_recipient_status CHECK (((status)::text = ANY (ARRAY[('pending'::character varying)::text, ('sent'::character varying)::text, ('delivered'::character varying)::text, ('skipped'::character varying)::text, ('permanent_failed'::character varying)::text, ('blocked'::character varying)::text, ('suppressed'::character varying)::text, ('bounced'::character varying)::text, ('complained'::character varying)::text]))),
-    CONSTRAINT chk_email_delivery_recipient_terminal_result CHECK (((((status)::text = 'pending'::text) AND (terminal_at IS NULL) AND (provider_message_id IS NULL) AND (error_type IS NULL)) OR (((status)::text = ANY (ARRAY[('sent'::character varying)::text, ('delivered'::character varying)::text])) AND (terminal_at IS NOT NULL) AND isfinite(terminal_at) AND (error_type IS NULL)) OR (((status)::text = ANY (ARRAY[('skipped'::character varying)::text, ('permanent_failed'::character varying)::text, ('blocked'::character varying)::text, ('suppressed'::character varying)::text, ('bounced'::character varying)::text, ('complained'::character varying)::text])) AND (terminal_at IS NOT NULL) AND isfinite(terminal_at))))
+    CONSTRAINT chk_email_delivery_recipient_terminal_result CHECK (((((status)::text = 'pending'::text) AND (terminal_at IS NULL) AND (provider_message_id IS NULL) AND (error_type IS NULL)) OR (((status)::text = ANY (ARRAY[('sent'::character varying)::text, ('delivered'::character varying)::text])) AND (terminal_at IS NOT NULL) AND isfinite(terminal_at) AND (error_type IS NULL)) OR (((status)::text = ANY (ARRAY[('skipped'::character varying)::text, ('permanent_failed'::character varying)::text, ('blocked'::character varying)::text, ('suppressed'::character varying)::text, ('bounced'::character varying)::text, ('complained'::character varying)::text])) AND (terminal_at IS NOT NULL) AND isfinite(terminal_at)))),
+    CONSTRAINT chk_email_delivery_recipient_delivery_claim_pair CHECK (((delivery_claim_id IS NULL) = (delivery_claim_expires_at IS NULL)))
 );
 
 

@@ -33,6 +33,20 @@ ALTER TABLE public.page_translation
 This repository supplies a fresh-install snapshot. Applying it or this upgrade
 to a running installation is a separate deployment operation.
 
+## Campaign delivery recipient claims
+
+`email_delivery_recipient.delivery_claim_id` and
+`email_delivery_recipient.delivery_claim_expires_at` record the owner and expiry
+of a pending recipient's delivery claim. They are nullable and constrained to be
+either both null or both present. A fresh install creates both columns without
+defaults. Existing installations must apply the versioned
+`email-delivery-claims-v1` operation in the deployment repository before running
+an API that persists recipient claims. The forward-only operation adds both
+nullable columns without changing existing recipients, including terminal
+delivery rows; those rows remain unclaimed. It verifies the column contract,
+pair constraint, and preexisting row values, and can be safely retried after a
+successful run.
+
 ## CI performance
 
 On the same local `linux/amd64` host, a cold-ish fresh-schema run fell from
