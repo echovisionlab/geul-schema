@@ -249,6 +249,26 @@ $$;
 
 
 --
+-- Name: advance_post_configuration_revision(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.advance_post_configuration_revision() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    IF ROW(NEW.slug, NEW.comments_enabled, NEW.map_place_id, NEW.document_layout)
+       IS DISTINCT FROM
+       ROW(OLD.slug, OLD.comments_enabled, OLD.map_place_id, OLD.document_layout) THEN
+        NEW.configuration_revision := pg_catalog.gen_random_uuid();
+    ELSE
+        NEW.configuration_revision := OLD.configuration_revision;
+    END IF;
+    RETURN NEW;
+END
+$$;
+
+
+--
 -- Name: geul_email_block_props_are_valid(text, jsonb); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -3502,6 +3522,7 @@ CREATE TABLE public.post (
     scheduled_time_zone text,
     content_document_id uuid NOT NULL,
     source_locale text DEFAULT 'en'::text NOT NULL,
+    configuration_revision uuid DEFAULT gen_random_uuid() NOT NULL,
     CONSTRAINT chk_post_document_layout CHECK (
 CASE
     WHEN (jsonb_typeof(document_layout) = 'object'::text) THEN ((document_layout ?& ARRAY['contentHeight'::text, 'pageChrome'::text, 'footer'::text]) AND ((document_layout - ARRAY['contentHeight'::text, 'pageChrome'::text, 'footer'::text]) = '{}'::jsonb) AND COALESCE(((document_layout ->> 'contentHeight'::text) = ANY (ARRAY['content'::text, 'viewport'::text])), false) AND COALESCE(((document_layout ->> 'pageChrome'::text) = ANY (ARRAY['flow'::text, 'pinned'::text])), false) AND COALESCE(((document_layout ->> 'footer'::text) = ANY (ARRAY['flow'::text, 'pinned'::text])), false))
@@ -8030,6 +8051,13 @@ CREATE CONSTRAINT TRIGGER enforce_page_content_document_owner AFTER INSERT OR UP
 --
 
 CREATE CONSTRAINT TRIGGER enforce_post_content_document_owner AFTER INSERT OR UPDATE OF content_document_id ON public.post DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION public.enforce_content_document_owner_contract();
+
+
+--
+-- Name: post post_configuration_revision_before_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER post_configuration_revision_before_update BEFORE UPDATE ON public.post FOR EACH ROW EXECUTE FUNCTION public.advance_post_configuration_revision();
 
 
 --
