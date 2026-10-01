@@ -33,6 +33,22 @@ ALTER TABLE public.page_translation
 This repository supplies a fresh-install snapshot. Applying it or this upgrade
 to a running installation is a separate deployment operation.
 
+## Post configuration revisions
+
+`post.configuration_revision` is a non-null UUID with a `gen_random_uuid()`
+default. PostgreSQL rotates it before an update when `slug`,
+`comments_enabled`, `map_place_id`, or `document_layout` changes. An update that
+restores an earlier value receives a new revision; a no-op or a change to body,
+lifecycle, or other Post fields preserves the existing revision. This trigger
+also covers older API writers. API acknowledgements use the revision returned
+by PostgreSQL.
+
+Existing installations must apply the forward-only
+`post-configuration-revisions-v1` operation in the deployment repository
+before running an API that reads or writes this revision. It adds and validates
+the column, function, and trigger in one transaction, checks that existing Post
+rows and revisions are preserved, and can be safely retried.
+
 ## Campaign delivery recipient claims
 
 `email_delivery_recipient.delivery_claim_id` and
