@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.3](https://github.com/echovisionlab/geul-schema/compare/v0.1.2...v0.1.3) (2026-10-01)
+
+
+### Bug Fixes
+
+* **release:** synchronize schema snapshot metadata ([#9](https://github.com/echovisionlab/geul-schema/issues/9)) ([9022550](https://github.com/echovisionlab/geul-schema/commit/9022550f8cd04ef44977446169e753ab0c1d346e))
+
 ## [0.1.2](https://github.com/echovisionlab/geul-schema/compare/v0.1.1...v0.1.2) (2026-10-01)
 
 
