@@ -11,7 +11,7 @@ validation/replay functions. Queue names and public table, column, and enum
 identifiers are public contracts. Deployment configures database owners and
 login roles.
 
-Current snapshot: `0.1.0`
+Current snapshot: `0.1.2` <!-- x-release-please-version -->
 
 ## Page locale write authority
 
