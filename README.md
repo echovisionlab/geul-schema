@@ -63,6 +63,29 @@ delivery rows; those rows remain unclaimed. It verifies the column contract,
 pair constraint, and preexisting row values, and can be safely retried after a
 successful run.
 
+## Client media upload bundles
+
+`upload_session.client_media_bundle_id` (UUID) and `client_media_manifest`
+(JSONB) are nullable and constrained to be either both null or both present.
+Existing upload sessions remain unchanged with both values null. The API stores
+an immutable expected artifact manifest with a stable bundle identity; verified
+artifact bodies live in session-owned staging storage. No receipt table or
+mutable artifact receipt state is added to the schema.
+
+`file.client_media_bundle_id` is a nullable UUID that preserves the committed
+bundle identity after upload-session cleanup. Legacy files keep it null. The
+API exposes it through authorized media-delivery reads so a lost completion
+response can be recovered only for the exact committed bundle.
+
+Existing installations must apply the forward-only SQL file
+[`migrations/20261004-client-media-upload-v1.sql`](migrations/20261004-client-media-upload-v1.sql)
+before deploying an API that reads or writes these columns. Run it with
+`psql -v ON_ERROR_STOP=1 -f migrations/20261004-client-media-upload-v1.sql`.
+The operation adds the nullable session and File columns and session pair
+constraint in one transaction,
+preserves existing sessions, and can be retried. Applying it to a running
+installation remains a separate deployment operation.
+
 ## CI performance
 
 On the same local `linux/amd64` host, a cold-ish fresh-schema run fell from

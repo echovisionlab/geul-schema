@@ -2835,6 +2835,7 @@ CREATE TABLE public.file (
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     ingest_slot_id text,
     ingest_attempt_id text,
+    client_media_bundle_id uuid,
     duration_seconds integer,
     extension text NOT NULL,
     sha256 bytea,
@@ -4417,6 +4418,9 @@ CREATE TABLE public.upload_session (
     attempt_id text,
     ingest_sequence bigint DEFAULT 0 NOT NULL,
     expected_current_file_id uuid,
+    client_media_bundle_id uuid,
+    client_media_manifest jsonb,
+    CONSTRAINT chk_upload_session_client_media_pair CHECK (((client_media_bundle_id IS NULL) = (client_media_manifest IS NULL))),
     CONSTRAINT chk_upload_session_semantic_target_owner CHECK (
 CASE
     WHEN (upload_type = ANY (ARRAY['UPLOAD_TYPE_GENERAL_FILE'::text, 'UPLOAD_TYPE_EDITOR_IMAGE'::text, 'UPLOAD_TYPE_EDITOR_AUDIO'::text, 'UPLOAD_TYPE_EDITOR_VIDEO'::text, 'UPLOAD_TYPE_EDITOR_ATTACHMENT'::text, 'UPLOAD_TYPE_EDITOR_MESH'::text])) THEN ((entity_id IS NULL) AND (entity_type IS NULL) AND (slot_id IS NULL) AND (expected_current_file_id IS NULL))
