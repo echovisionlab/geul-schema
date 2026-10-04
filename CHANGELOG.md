@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/echovisionlab/geul-schema/compare/v0.1.3...v0.2.0) (2026-10-04)
+
+
+### Features
+
+* persist client media upload bundle identities ([f13e134](https://github.com/echovisionlab/geul-schema/commit/f13e134393dd746ebaf49be67f43de2de62871ba))
+
 ## [0.1.3](https://github.com/echovisionlab/geul-schema/compare/v0.1.2...v0.1.3) (2026-10-01)
 
 
