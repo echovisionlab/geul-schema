@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/echovisionlab/geul-schema/compare/v0.2.0...v0.2.1) (2026-10-05)
+
+
+### Bug Fixes
+
+* **postgres:** refresh extension catalogs with released image ([#15](https://github.com/echovisionlab/geul-schema/issues/15)) ([e8256b2](https://github.com/echovisionlab/geul-schema/commit/e8256b274926174a48c57045296e47c6ad9fdffe))
+
 ## [0.2.0](https://github.com/echovisionlab/geul-schema/compare/v0.1.3...v0.2.0) (2026-10-04)
 
 
