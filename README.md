@@ -86,6 +86,28 @@ constraint in one transaction,
 preserves existing sessions, and can be retried. Applying it to a running
 installation remains a separate deployment operation.
 
+## PostgreSQL extension refresh
+
+Existing installations with PGroonga 4.0.8 and PGMQ 1.12.0 must first run the
+released Geul PostgreSQL v0.1.2 image, which supplies PGroonga 4.0.9 and PGMQ
+1.13.0. Replacing the image alone does not update an existing extension catalog.
+Back up the database, then apply
+[`migrations/20261006-postgres-extension-refresh.sql`](migrations/20261006-postgres-extension-refresh.sql)
+to `geul` as the database administrator:
+
+```sh
+psql --no-psqlrc -d geul -v ON_ERROR_STOP=1 -f migrations/20261006-postgres-extension-refresh.sql
+```
+
+The migration updates both extensions in one transaction and can be retried
+after success. PGMQ 1.13.0 adds `default_partition_length` to `metrics_result`;
+queue consumers must select their required fields instead of relying on the
+complete composite row's column count. PGroonga indexes and queued messages
+remain in place. An error rolls back both catalog updates. Applying this file
+to a running installation is a separate deployment operation; a successful
+upgrade is forward-only, with rollback requiring the database backup and prior
+image.
+
 ## CI performance
 
 On the same local `linux/amd64` host, a cold-ish fresh-schema run fell from

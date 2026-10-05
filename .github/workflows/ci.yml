@@ -23,12 +23,12 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Pull pinned PostgreSQL image
-        run: docker pull registry.dsub.io/echovisionlab/geul-postgres@sha256:41a2c6fb9e026ed327463e7662c92c5cc27e918bdaae6fa3447f45335d74494a
+        run: docker pull registry.dsub.io/echovisionlab/geul-postgres@sha256:313bc71d400dda733db87fe3ec00caea6db8a9a686b46eddb2f0f8d54c333d2f
 
       - name: Apply and inspect fresh schema
         run: |
           container_name=geul-schema-postgres
-          postgres_image=registry.dsub.io/echovisionlab/geul-postgres@sha256:41a2c6fb9e026ed327463e7662c92c5cc27e918bdaae6fa3447f45335d74494a
+          postgres_image=registry.dsub.io/echovisionlab/geul-postgres@sha256:313bc71d400dda733db87fe3ec00caea6db8a9a686b46eddb2f0f8d54c333d2f
           docker run --detach --name "${container_name}" \
             --env POSTGRES_USER=postgres \
             --env POSTGRES_PASSWORD=postgres \
