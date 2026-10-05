@@ -28,7 +28,7 @@ jobs:
           persist-credentials: false
 
       - name: Check workflows
-        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.11
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12
 
       - name: Check release configuration JSON
         run: jq empty release-please-config.json
