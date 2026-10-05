@@ -1,0 +1,34 @@
+name: Workflow Lint
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/**'
+      - 'release-please-config.json'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  workflow-lint:
+    name: Workflow Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GOWORK: 'off'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check workflows
+        run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.11
+
+      - name: Check release configuration JSON
+        run: jq empty release-please-config.json
