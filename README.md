@@ -33,6 +33,21 @@ ALTER TABLE public.page_translation
 This repository supplies a fresh-install snapshot. Applying it or this upgrade
 to a running installation is a separate deployment operation.
 
+## Page access policy
+
+`page.access_policy` is a non-null JSONB object with an empty-object default.
+The empty policy preserves existing public Page access. The API normalizes and
+validates policy mode, roles, and tags; PostgreSQL enforces the object shape.
+
+Existing installations must apply the forward-only
+[`migrations/20261006-page-access-policy-v1.sql`](migrations/20261006-page-access-policy-v1.sql)
+before deploying an API that reads this column. Run it with
+`psql -v ON_ERROR_STOP=1 -f migrations/20261006-page-access-policy-v1.sql`.
+It is transactional and retry safe, verifies existing column and constraint
+metadata, and does not rewrite Page content or existing policies. Deployment
+ships the same SQL in `page-access-policy-v1`; application runtime waits for
+that Flux migration to become Ready.
+
 ## Post configuration revisions
 
 `post.configuration_revision` is a non-null UUID with a `gen_random_uuid()`
