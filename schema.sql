@@ -3455,12 +3455,29 @@ CREATE TABLE public.page (
     document_layout jsonb DEFAULT '{"footer": "flow", "pageChrome": "flow", "contentHeight": "content"}'::jsonb NOT NULL,
     content_document_id uuid NOT NULL,
     source_locale text DEFAULT 'en'::text NOT NULL,
+    access_policy jsonb DEFAULT '{}'::jsonb NOT NULL,
+    CONSTRAINT chk_page_access_policy_object CHECK ((jsonb_typeof(access_policy) = 'object'::text)),
     CONSTRAINT chk_page_document_layout CHECK (
 CASE
     WHEN (jsonb_typeof(document_layout) = 'object'::text) THEN ((document_layout ?& ARRAY['contentHeight'::text, 'pageChrome'::text, 'footer'::text]) AND ((document_layout - ARRAY['contentHeight'::text, 'pageChrome'::text, 'footer'::text]) = '{}'::jsonb) AND COALESCE(((document_layout ->> 'contentHeight'::text) = ANY (ARRAY['content'::text, 'viewport'::text])), false) AND COALESCE(((document_layout ->> 'pageChrome'::text) = ANY (ARRAY['flow'::text, 'pinned'::text])), false) AND COALESCE(((document_layout ->> 'footer'::text) = ANY (ARRAY['flow'::text, 'pinned'::text])), false))
     ELSE false
 END),
-    CONSTRAINT chk_page_slug_route_namespace CHECK (((slug IS NULL) OR (((slug)::text = btrim((slug)::text)) AND ((slug)::text <> ''::text) AND ("left"((slug)::text, 1) <> '/'::text) AND ("right"((slug)::text, 1) <> '/'::text) AND (strpos((slug)::text, '//'::text) = 0) AND (NOT (string_to_array((slug)::text, '/'::text) && ARRAY['.'::text, '..'::text])) AND ((lower((slug)::text) = 'tools'::text) OR (lower(split_part((slug)::text, '/'::text, 1)) <> ALL (ARRAY['_next'::text, 'account'::text, 'admin'::text, 'api'::text, 'auth'::text, 'category'::text, 'changelog'::text, 'favicon.ico'::text, 'files'::text, 'login'::text, 'manifest.webmanifest'::text, 'my'::text, 'onboarding'::text, 'privacy'::text, 'robots.txt'::text, 's'::text, 'sitemap'::text, 'sitemap.xml'::text, 'sitemaps'::text, 'subscribe'::text, 'tag'::text, 'terms'::text, 'tools'::text, 'unsubscribe'::text, 'user'::text, 'verification'::text, 'verify'::text])))))),
+    CONSTRAINT chk_page_slug_route_namespace CHECK ((slug IS NULL) OR (
+        slug = btrim(slug)
+        AND slug <> ''
+        AND left(slug, 1) <> '/'
+        AND right(slug, 1) <> '/'
+        AND strpos(slug, '//') = 0
+        AND NOT (string_to_array(slug, '/') && ARRAY['.', '..'])
+        AND lower(split_part(slug, '/', 1)) <> ALL (ARRAY[
+            '_next', 'account', 'admin', 'api', 'auth', 'category',
+            'changelog', 'favicon.ico', 'files', 'login', 'manifest.webmanifest',
+            'my', 'onboarding', 'privacy', 'robots.txt', 's', 'sitemap',
+            'sitemap.xml', 'sitemaps', 'subscribe', 'tag', 'terms',
+            'unsubscribe', 'user', 'verification', 'verify'
+        ])
+        AND lower(slug) !~ '^tools/p5-runner(/|$)'
+    )),
     CONSTRAINT chk_page_status CHECK (((status)::text = ANY (ARRAY['PAGE_STATUS_DRAFT'::text, 'PAGE_STATUS_PUBLISHED'::text])))
 );
 
