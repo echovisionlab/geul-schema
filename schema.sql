@@ -8613,13 +8613,6 @@ ALTER TABLE ONLY public.email_delivery_run
 
 
 --
--- Name: email_delivery_run email_delivery_run_privacy_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.email_delivery_run
-    ADD CONSTRAINT email_delivery_run_privacy_id_fkey FOREIGN KEY (privacy_id) REFERENCES public.privacy_history(id) ON DELETE RESTRICT;
-
-
 --
 -- Name: email_delivery_run email_delivery_run_source_layout_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
@@ -8677,13 +8670,6 @@ ALTER TABLE ONLY public.email_delivery_run_target_user_tag
 
 
 --
--- Name: email_delivery_run email_delivery_run_terms_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.email_delivery_run
-    ADD CONSTRAINT email_delivery_run_terms_id_fkey FOREIGN KEY (terms_id) REFERENCES public.terms_history(id) ON DELETE RESTRICT;
-
-
 --
 -- Name: email_layout_translation email_layout_translation_entity_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --

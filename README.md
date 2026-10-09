@@ -123,6 +123,22 @@ to a running installation is a separate deployment operation; a successful
 upgrade is forward-only, with rollback requiring the database backup and prior
 image.
 
+## Legal policy CRUD
+
+Legal policies may be edited and deleted in every lifecycle by an authorized
+caller. Existing installations must apply
+[`migrations/20261009-legal-policy-crud-v1.sql`](migrations/20261009-legal-policy-crud-v1.sql)
+before deploying the API that permits deletion with notice delivery history.
+Run it with `psql -v ON_ERROR_STOP=1 -f migrations/20261009-legal-policy-crud-v1.sql`.
+The migration is transactional and retry safe. It removes only the two policy
+foreign keys; it preserves delivery runs, recipients, sealed render snapshots,
+and all policy data.
+
+`email_delivery_run.terms_id` and `privacy_id` are immutable historical
+references. Their policy may no longer exist. Sealed definitions still require
+exactly one policy UUID and its captured version. Policy deletion cancels
+outstanding notices and pending recipients while preserving sent history.
+
 ## CI performance
 
 On the same local `linux/amd64` host, a cold-ish fresh-schema run fell from
