@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0](https://github.com/echovisionlab/geul-schema/compare/v0.2.1...v0.3.0) (2026-10-09)
+
+
+### Features
+
+* **page:** add audience policies and CMS tool routes ([#17](https://github.com/echovisionlab/geul-schema/issues/17)) ([11ee727](https://github.com/echovisionlab/geul-schema/commit/11ee7275e8210f0304091c0e02527d458abaaee3))
+* **schema:** preserve delivery history after policy deletion ([#19](https://github.com/echovisionlab/geul-schema/issues/19)) ([6f79089](https://github.com/echovisionlab/geul-schema/commit/6f790893a3ea53a6cba444a87548bdf1531fb880))
+
 ## [0.2.1](https://github.com/echovisionlab/geul-schema/compare/v0.2.0...v0.2.1) (2026-10-05)
 
 
